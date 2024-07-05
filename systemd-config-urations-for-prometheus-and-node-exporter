@@ -1,0 +1,51 @@
+In node_exporter server , write below command
+
+ 1)  # nano /etc/systemd/system/node_exporter.service
+
+Then copy following data inside it and save th file
+
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+[Service]
+ExecStart=/etc/node_exporter/node_exporter
+Restart=always
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+In Prometheus server , write below command
+
+  1)  # nano /etc/systemd/system/prometheus.service
+
+Then copy following data inside it and save th file
+
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+[Service]
+ExecStart=/etc/prometheus/prometheus --config.file=/etc/prometheus/prometheus.yml
+Restart=always
+[Install]
+WantedBy=multi-user.target
+
+ 
+   2) setup scrape file of prometheus . Follow the below commands
+
+     # sudo rm -rf /etc/prometheus/prometheus.yml
+
+     # sudo nano /etc/prometheus/prometheus.yml
+
+      now copy below data inside it and save it
+  
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: node
+  static_configs:
+  - targets: ['localhost:9100']
