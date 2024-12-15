@@ -42,14 +42,15 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
- 
-   2) setup scrape file of prometheus . Follow the below commands
 
-     # sudo rm -rf /etc/prometheus/prometheus.yml
+setup scrape file of prometheus . Follow the below commands
 
-     # sudo nano /etc/prometheus/prometheus.yml
+```bash
+sudo rm -rf /etc/prometheus/prometheus.yml
+sudo nano /etc/prometheus/prometheus.yml
+```
 
-      now copy below data inside it and save it
+now copy below data inside it and save it
       
 ```bash  
 global:
