@@ -64,7 +64,7 @@ scrape_configs:
 
 ### Black Exporter setup:-
 
-- You don't need to confiure
+- You don't need to configure any blackbox exporter file. Install and run it.
 - You will write next in prometheus.yml file
 
 ```bash
