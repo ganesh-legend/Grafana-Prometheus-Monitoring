@@ -50,6 +50,7 @@ WantedBy=multi-user.target
      # sudo nano /etc/prometheus/prometheus.yml
 
       now copy below data inside it and save it
+      
 ```bash  
 global:
   scrape_interval: 15s
