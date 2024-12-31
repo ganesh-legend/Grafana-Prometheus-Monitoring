@@ -50,8 +50,8 @@ sudo rm -rf /etc/prometheus/prometheus.yml
 sudo nano /etc/prometheus/prometheus.yml
 ```
 
-now copy below data inside it and save it
-      
+Now copy below data inside it and save it
+###### This for Node Exporter configuration in prometheus      
 ```bash  
 global:
   scrape_interval: 15s
@@ -66,8 +66,25 @@ scrape_configs:
 
 ### Black Exporter setup:-
 
-- You don't need to configure any blackbox exporter file. Install and run it.
-- You will write next in prometheus.yml file
+- You need to setup blackbox exporter systemd file.
+
+```bash
+[Unit]
+Description=Blackbox Exporter Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+ExecStart=/etc/blackbox_exporter/blackbox_exporter --config.file=/etc/blackbox_exporter/blackbox.yml
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- You will copy next in prometheus.yml file. Copy carefully, understand indentation.
 
 ```bash
 global:
@@ -91,3 +108,7 @@ scrape_configs:
     - target_label: __address__
       replacement: 127.0.0.1:9115
 ```
+
+
+You are done......😊
+Thanks 🙏
