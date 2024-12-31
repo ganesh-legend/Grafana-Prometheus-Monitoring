@@ -70,7 +70,7 @@ scrape_configs:
 - You need to setup blackbox exporter systemd file.
 
 ```bash
- sudo nano /etc/systemd/system/prometheus.service
+ sudo nano /etc/systemd/system/blackbox_exporter.service
 ```
 
 ```bash
