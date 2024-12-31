@@ -3,7 +3,7 @@
 In node_exporter server , write below command
 
 ```bash
- nano /etc/systemd/system/node_exporter.service
+sudo nano /etc/systemd/system/node_exporter.service
 ```
 
 Then copy following data inside it and save th file
@@ -68,6 +68,10 @@ scrape_configs:
 ### Black Exporter setup:-
 
 - You need to setup blackbox exporter systemd file.
+
+```bash
+ sudo nano /etc/systemd/system/prometheus.service
+```
 
 ```bash
 [Unit]
