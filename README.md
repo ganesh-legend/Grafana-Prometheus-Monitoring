@@ -133,8 +133,17 @@ docker run --name loki -d -p 3100:3100 -v $(pwd):/mnt/config --network loki-prom
 docker run --name promtail -d -p 9080:9080 -v $(pwd):/mnt/config -v /var/log:/var/log --network loki-promtail grafana/promtail:3.2.1 -config.file=/mnt/config/promtail-config.yaml
 ```
 
+#
+
+### Setup grafana
+
 ```bash
+sudo apt-get install -y adduser libfontconfig1 musl
+wget https://dl.grafana.com/enterprise/release/grafana-enterprise_11.4.0_amd64.deb
+sudo dpkg -i grafana-enterprise_11.4.0_amd64.deb
 ```
+
+#
 
 You are done......😊
 Thanks 🙏
