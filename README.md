@@ -129,8 +129,8 @@ wget https://raw.githubusercontent.com/grafana/loki/v3.0.0/clients/cmd/promtail/
 
 ##### run docker containers for loki and promtail
 ```bash
-docker run --name loki -d -p 3100:3100 -v $(pwd):/mnt/config --network loki-prometheus grafana/loki:3.2.1 -config.file=/mnt/config/loki-config.yaml
-docker run --name promtail -d -p 9080:9080 -v $(pwd):/mnt/config -v /var/log:/var/log --network loki-prometheus grafana/promtail:3.2.1 -config.file=/mnt/config/promtail-config.yaml
+docker run --name loki -d -p 3100:3100 -v $(pwd):/mnt/config --network loki-promtail grafana/loki:3.2.1 -config.file=/mnt/config/loki-config.yaml
+docker run --name promtail -d -p 9080:9080 -v $(pwd):/mnt/config -v /var/log:/var/log --network loki-promtail grafana/promtail:3.2.1 -config.file=/mnt/config/promtail-config.yaml
 ```
 
 ```bash
