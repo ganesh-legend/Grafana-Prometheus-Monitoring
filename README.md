@@ -20,6 +20,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
+#
 
 ### Prometheus Setup:-
 
@@ -62,7 +63,7 @@ scrape_configs:
   - targets: ['localhost:9100']
 ```
 
-
+#
 
 ### Black Exporter setup:-
 
@@ -109,6 +110,31 @@ scrape_configs:
       replacement: 127.0.0.1:9115
 ```
 
+#
+
+### Setup Grafana Loki and promtail using docker
+
+##### Create loki directory at your home directory.
+```bash
+cd ~
+mkdir loki
+cd loki
+```
+
+##### download configuration file loki and promtail
+```bash
+wget https://raw.githubusercontent.com/grafana/loki/v3.0.0/cmd/loki/loki-local-config.yaml -O loki-config.yaml
+wget https://raw.githubusercontent.com/grafana/loki/v3.0.0/clients/cmd/promtail/promtail-docker-config.yaml -O promtail-config.yaml
+```
+
+##### run docker containers for loki and promtail
+```bash
+docker run --name loki -d -p 3100:3100 -v $(pwd):/mnt/config -config.file=/mnt/config/loki-config.yaml grafana/loki:3.2.1
+docker run --name promtail -d -p 9080:9080 -v $(pwd):/mnt/config -v /var/log:/var/log --link loki -config.file=/mnt/config/promtail-config.yaml grafana/promtail:3.2.1
+```
+
+```bash
+```
 
 You are done......😊
 Thanks 🙏
