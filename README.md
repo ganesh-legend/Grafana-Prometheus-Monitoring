@@ -20,7 +20,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-#### This command according to your configuration, node_exporter what i have set up here, may differ in your case
+#### This command according to your configuration. node_exporter what i have set up here, may differ in your case
 ```bash
 sudo mv node_exporter.0.27-amd /etc/node_exporter
 ```
@@ -47,6 +47,11 @@ ExecStart=/etc/prometheus/prometheus --config.file=/etc/prometheus/prometheus.ym
 Restart=always
 [Install]
 WantedBy=multi-user.target
+```
+
+#### This command according to your configuration. prometheus what i have set up here, may differ in your case
+```bash
+sudo mv prometheus.0.27-amd /etc/prometheus
 ```
 
 setup scrape file of prometheus . Follow the below commands
@@ -92,6 +97,11 @@ ExecStart=/etc/blackbox_exporter/blackbox_exporter --config.file=/etc/blackbox_e
 
 [Install]
 WantedBy=multi-user.target
+```
+
+#### This command according to your configuration. prometheus what i have set up here, may differ in your case
+```bash
+sudo mv blackbox_exporter.0.27-amd /etc/blackbox_exporter
 ```
 
 - You will copy next in prometheus.yml file. Copy carefully, understand indentation.
