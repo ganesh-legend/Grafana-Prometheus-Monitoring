@@ -20,6 +20,11 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
+#### This command according to our configuration, node_exporter what i have set up , may differ in your case
+```bash
+sudo mv node_exporter.0.27-amd /etc/node_exporter
+```
+
 #
 
 ### Prometheus Setup:-
