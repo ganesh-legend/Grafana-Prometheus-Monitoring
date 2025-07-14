@@ -131,6 +131,257 @@ scrape_configs:
 
 #
 
+### Alert Manager setup:-
+
+- You need to setup alert manager systemd file.
+
+```bash
+ sudo nano /etc/systemd/system/alertmanager.service
+```
+
+```bash
+[Unit]
+Description=Alertmanager
+Wants=network-online.target
+After=network-online.target
+[Service]
+ExecStart=/etc/alertmanager/alertmanager --config.file=/etc/alertmanager/alertmanager.yml
+Restart=always
+[Install]
+WantedBy=multi-user.target
+```
+
+#### This command according to your configuration. prometheus what i have set up here, may differ in your case
+```bash
+sudo mv alertmanager.0.27-amd /etc/alertmanager
+```
+
+- You will copy next in prometheus.yml file. Copy carefully, understand indentation.
+```bash
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'localhost:9093'          # Alertmanager endpoint
+
+rule_files:
+   - "alert_rules.yml"                # Path to alert rules file
+  # - "second_rules.yml"              # Additional rule files can be added here
+```
+
+#
+
+#### final prometheus file would look like
+```bash
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: "prometheus"            # Job name for Prometheus
+
+  # metrics_path defaults to '/metrics'
+  # scheme defaults to 'http'.
+
+  static_configs:
+  - targets: ["localhost:9090"]   # Target to scrape (Prometheus itself)
+
+- job_name: node
+  static_configs:
+  - targets: ['13.71.57.58:9100']
+
+- job_name: 'blackbox'
+  metrics_path: /probe
+  params:
+    module: [http_2xx]  # Look for a HTTP 200 response.
+  static_configs:
+    - targets:
+      - https://portfolio.ganeshpawar.one
+      - http://monitor.ganeshpawar.one:9090
+      - http://monitor.ganeshpawar.one:3000
+      - http://monitor.ganeshpawar.one:9115
+      - http://monitor.ganeshpawar.one:9093
+      - http://13.71.57.58:9100
+      - http://13.71.57.58:8080
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 127.0.0.1:9115
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'localhost:9093'          # Alertmanager endpoint
+
+rule_files:
+   - "alert_rules.yml"                # Path to alert rules file
+  # - "second_rules.yml"              # Additional rule files can be added here
+
+
+azureuser@Monitoring-1:/etc/alertmanager$ cat /etc/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: "prometheus"            # Job name for Prometheus
+
+  # metrics_path defaults to '/metrics'
+  # scheme defaults to 'http'.
+
+  static_configs:
+  - targets: ["localhost:9090"]   # Target to scrape (Prometheus itself)
+
+- job_name: node
+  static_configs:
+  - targets: ['13.71.57.58:9100']
+
+- job_name: 'blackbox'
+  metrics_path: /probe
+  params:
+    module: [http_2xx]  # Look for a HTTP 200 response.
+  static_configs:
+    - targets:
+      - https://portfolio.ganeshpawar.one
+      - http://monitor.ganeshpawar.one:9090
+      - http://monitor.ganeshpawar.one:3000
+      - http://monitor.ganeshpawar.one:9115
+      - http://monitor.ganeshpawar.one:9093
+      - http://13.71.57.58:9100
+      - http://13.71.57.58:8080
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 127.0.0.1:9115
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'localhost:9093'          # Alertmanager endpoint
+
+rule_files:
+   - "alert_rules.yml"                # Path to alert rules file
+  # - "second_rules.yml"              # Additional rule files can be added here
+```
+#
+
+#### create alert_rules.yml file in prometheus location /etc/prometheus/alert_rules.yml
+```bash
+groups:
+- name: alert_rules                   # Name of the alert rules group
+  rules:
+    - alert: InstanceDown
+      expr: up == 0                   # Expression to detect instance down
+      for: 1m
+      labels:
+        severity: "critical"
+      annotations:
+        summary: "Endpoint {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+    - alert: WebsiteDown
+      expr: probe_success == 0        # Expression to detect website down
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        description: The website at {{ $labels.instance }} is down.
+        summary: Website down
+
+    - alert: HostOutOfMemory
+      expr: node_memory_MemAvailable / node_memory_MemTotal * 100 < 25  # Expression to detect low memory
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host out of memory (instance {{ $labels.instance }})"
+        description: "Node memory is filling up (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: HostOutOfDiskSpace
+      expr: (node_filesystem_avail{mountpoint="/"} * 100) / node_filesystem_size{mountpoint="/"} < 50  # Expression to detect low disk space
+      for: 1s
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host out of disk space (instance {{ $labels.instance }})"
+        description: "Disk is almost full (< 50% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: HostHighCpuLoad
+      expr: (sum by (instance) (irate(node_cpu{job="node_exporter_metrics",mode="idle"}[5m]))) > 80  # Expression to detect high CPU load
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host high CPU load (instance {{ $labels.instance }})"
+        description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: ServiceUnavailable
+      expr: up{job="node_exporter"} == 0  # Expression to detect service unavailability
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Service Unavailable (instance {{ $labels.instance }})"
+        description: "The service {{ $labels.job }} is not available\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: HighMemoryUsage
+      expr: (node_memory_Active / node_memory_MemTotal) * 100 > 90  # Expression to detect high memory usage
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High Memory Usage (instance {{ $labels.instance }})"
+        description: "Memory usage is > 90%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - alert: FileSystemFull
+      expr: (node_filesystem_avail / node_filesystem_size) * 100 < 10  # Expression to detect file system almost full
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "File System Almost Full (instance {{ $labels.instance }})"
+        description: "File system has < 10% free space\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+```
+
+#
+
+#### set up alertmanager file /etc/alertmanager/alertmanager.yml
+```bash
+route:
+  group_by: ['alertname']             # Group by alert name
+  group_wait: 30s                     # Wait time before sending the first notification
+  group_interval: 5m                  # Interval between notifications
+  repeat_interval: 1h                 # Interval to resend notifications
+  receiver: 'email-notifications'     # Default receiver
+
+receivers:
+- name: 'email-notifications'         # Receiver name
+  email_configs:
+  - to: gp420083@gmail.com       # Email recipient
+    from: ganeshpawar06969@gmail.com              # Email sender
+    smarthost: smtp.gmail.com:587     # SMTP server
+    auth_username: ganeshpawar06969@gmail.com         # SMTP auth username
+    auth_identity: ganeshpawar06969@gmail.com         # SMTP auth identity
+    auth_password: "zhql dubm jbnu qirt"  # SMTP auth password
+    send_resolved: true               # Send notifications for resolved alerts
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'            # Source alert severity
+    target_match:
+      severity: 'warning'             # Target alert severity
+    equal: ['alertname', 'dev', 'instance']  # Fields to match
+```
+
+#
+
+
 ### Setup Grafana Loki and promtail using docker
 
 ##### Create loki directory at your home directory.
