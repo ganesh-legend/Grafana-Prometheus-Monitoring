@@ -255,6 +255,10 @@ inhibit_rules:
 
 #### create alert_rules.yml file 
 ```bash
+sudo nano /etc/prometheus/alert_rules.yml
+```
+
+```bash
 groups:
 - name: alert_rules                   # Name of the alert rules group
   rules:
